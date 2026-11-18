@@ -149,8 +149,8 @@ Providers:
 
   console.log(`
 ╔═══════════════════════════════════════════════════════════╗
-║                       PasteGuard                          ║
-║              Privacy proxy for LLMs                       ║
+║                     NETRAX AI Gateway                     ║
+║     Keeps sensitive data private when teams use AI        ║
 ╚═══════════════════════════════════════════════════════════╝
 
 Server:     http://${host}:${port}

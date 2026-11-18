@@ -1,165 +1,64 @@
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/wordmark-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/wordmark-light.svg">
-    <img src="assets/wordmark-light.svg" width="220" height="44" alt="PasteGuard">
-  </picture>
-</p>
+# NETRAX AI Gateway
 
-<p align="center">
-  <a href="https://github.com/sgasser/pasteguard/actions/workflows/ci.yml"><img src="https://github.com/sgasser/pasteguard/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License"></a>
-  <a href="https://github.com/sgasser/pasteguard/releases"><img src="https://img.shields.io/github/v/release/sgasser/pasteguard" alt="Release"></a>
-</p>
+**Your team gets AI. Your clients' data stays private.**
 
-<p align="center">
-  <strong>AI gets the context. Not your private data.</strong><br>
-  PasteGuard masks PII and secrets before they reach ChatGPT, Claude, Gemini, your API provider, Codex, or Claude Code.
-</p>
+NETRAX sits between your staff and AI tools such as ChatGPT, Claude and Gemini. Before a request leaves your network it finds names, emails, account numbers, API keys and other sensitive data, then either:
 
-<p align="center">
-  <a href="#browser-chat"><strong>Browser Chat</strong></a> ·
-  <a href="#apps--apis"><strong>Apps & APIs</strong></a> ·
-  <a href="#coding-agents"><strong>Coding Agents</strong></a> ·
-  <a href="https://pasteguard.com/docs"><strong>Documentation</strong></a>
-</p>
+- **Masks it**: the AI provider sees placeholders, and the real values are put back in the answer, or
+- **Routes it to a local model**: requests that contain sensitive data go to an AI model running on your own machine, and everything else goes to the cloud.
 
-<br/>
+Every request is logged on your machine, so you can show what was protected and where each request went.
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/comparison-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="assets/comparison.png">
-  <img src="assets/comparison.png" width="100%" alt="PasteGuard masks names, emails, and API keys before they reach AI">
-</picture>
+NETRAX AI is built by [TechX Labs](https://techx.dev).
 
-<p align="center">
-  You keep the originals. Providers see placeholders.<br>
-  Run it locally or self-host it in your own infrastructure.
-</p>
-
-## What PasteGuard Protects
-
-PasteGuard is a local-first privacy layer for teams that cannot send raw client data, customer records, logs, credentials, or production details directly to model providers.
-
-It works in three places:
-
-### Browser Chat
-
-**ChatGPT, Claude, and Gemini.** Paste customer notes, contracts, support tickets, candidate details, or internal context without sending the raw private values to the chat provider. You see the originals; the AI sees placeholders.
-
-The experimental browser extension is available for ChatGPT, Claude, and Gemini.
-
-**[Install the extension →](https://pasteguard.com/browser-extension)** · **[Chat docs →](https://pasteguard.com/docs/use-cases/chat)**
-
-### Apps & APIs
-
-**Apps, SDKs, and internal AI products.** Point your application to PasteGuard instead of the provider directly.
-
-Change one base URL. PasteGuard masks the request, forwards it to the configured provider, and restores supported placeholders in the response.
-
-**[Apps & APIs docs](https://pasteguard.com/docs/use-cases/api-integration)**
-
-### Coding Agents
-
-**Codex, Claude Code, Cursor, Windsurf, Copilot, and other coding agents.** Agent prompts often include logs, stack traces, tickets, config files, test fixtures, and codebase context. PasteGuard masks secrets and PII before that context leaves your machine.
-
-**[Coding Agents docs](https://pasteguard.com/docs/use-cases/coding-tools)**
-
-## Built For Strict Privacy Rules
-
-PasteGuard is a privacy control point before AI providers. It can support regulated workflows, but it does not replace your legal, security, or compliance program.
-
-Use it when your current options are:
-
-- Do not use cloud AI for sensitive work
-- Redact client or production data manually
-- Switch to a local model even when a cloud provider would give better results
-- Build one-off masking code inside every app
-
-## Quick Start
-
-Run PasteGuard as a local proxy:
+## Quick start (Docker)
 
 ```bash
-docker run --rm -p 3000:3000 ghcr.io/sgasser/pasteguard:latest
+git clone https://github.com/TechX-Resources/netrax-gateway.git
+cd netrax-gateway
+cp config.example.yaml config.yaml
+docker compose up -d --build
 ```
 
-If the detector in 0.9.3 exits with `SIGSEGV`, add `-e ORT_DISABLE_TELEMETRY=1`
-to `docker run`; see [installation troubleshooting](https://pasteguard.com/docs/installation).
+- Health check: http://localhost:3000/health
+- Dashboard: http://localhost:3000/dashboard
+- OpenAI-compatible endpoint: http://localhost:3000/openai/v1/chat/completions
+- Anthropic-compatible endpoint: http://localhost:3000/anthropic/v1/messages
 
-Open [localhost:3000/health](http://localhost:3000/health) to check the service.
+Point any OpenAI- or Anthropic-compatible app at these URLs instead of the provider's URL.
 
-The dashboard is disabled by default. Set `dashboard.enabled: true` in `config.yaml`
-to enable it; see [dashboard configuration](https://pasteguard.com/docs/configuration/overview#dashboard).
+## Keep sensitive requests on your own machine
 
-Point your app or agent to PasteGuard instead of the provider:
+1. Install [Ollama](https://ollama.com) and pull a model, for example `ollama pull llama3.2`.
+2. In `config.yaml`, set `mode: route` and set `local.base_url` to your Ollama address (`http://host.docker.internal:11434` when NETRAX runs in Docker).
+3. Restart: `docker compose up -d`.
 
-| Target | PasteGuard URL | Original URL |
-|----------|----------------|--------------|
-| OpenAI | `http://localhost:3000/openai/v1` | `https://api.openai.com/v1` |
-| Anthropic | `http://localhost:3000/anthropic` | `https://api.anthropic.com` |
-| Codex CLI | `http://localhost:3000/codex` | `https://chatgpt.com/backend-api/codex` |
+Requests that contain sensitive data are answered by the local model, and the rest go to your cloud provider.
 
-```python
-from openai import OpenAI
+## Development
 
-client = OpenAI(base_url="http://localhost:3000/openai/v1")
+Requires [Bun](https://bun.sh).
+
+```bash
+bun install
+docker compose --profile dev up detector -d   # PII detector on port 5002
+DETECTOR_URL=http://localhost:5002 bun run dev
+bun test && bun run typecheck && bun run check
 ```
 
-Both `client.chat.completions.create(...)` and `client.responses.create(...)` pass through PasteGuard's privacy pipeline.
+## Staying in sync with PasteGuard
 
-For custom config, persistent logs, Docker Compose, or
-[custom GLiNER models](https://pasteguard.com/docs/configuration/gliner):
-**[Read the docs](https://pasteguard.com/docs/installation)**.
+This repository started from [PasteGuard](https://github.com/sgasser/pasteguard). The original project is kept as the `upstream` remote:
 
-## Privacy Modes
+```bash
+git remote add upstream https://github.com/sgasser/pasteguard.git   # once
+git fetch upstream
+git checkout -b sync/upstream-$(date +%Y%m%d) main
+git merge upstream/main          # resolve conflicts, then run the tests
+```
 
-<details>
-<summary><strong>Mask Mode</strong></summary>
-
-Mask Mode replaces PII and secrets with placeholders before sending the request to the upstream AI provider. Supported responses are restored before they return to the user.
-
-</details>
-
-<details>
-<summary><strong>Route Mode</strong></summary>
-
-Route Mode sends requests containing sensitive data to a local LLM such as Ollama, vLLM, or llama.cpp. Requests without sensitive data can still go to the configured cloud provider.
-
-**[Route Mode docs](https://pasteguard.com/docs/concepts/route-mode)**
-
-</details>
-
-## What It Catches
-
-**Personal data**: Names, locations, emails, phone numbers, credit cards, IBANs, IP addresses, EU VAT numbers, and Chinese Resident ID numbers. Detection is multilingual.
-
-**Secrets**: API keys for providers such as OpenAI, Anthropic, Stripe, AWS, and GitHub; SSH and PEM private keys; JWT tokens; bearer tokens; passwords; and connection strings.
-
-Both are detected and masked in real time, including streaming responses.
-
-## Dashboard
-
-Every request is logged with masking details. See what was detected, what was masked, and what reached the provider.
-
-<img src="assets/dashboard.png" width="100%" alt="PasteGuard Dashboard">
-
-[localhost:3000](http://localhost:3000)
-
-## How Detection Works
-
-The detector combines checksums and format checks for structured values with a
-semantic backend for names and places. GLiNER is currently the only backend.
-See [Semantic Backends](https://pasteguard.com/docs/configuration/semantic-backends).
-
-## Tech Stack
-
-[Bun](https://bun.sh) · [Hono](https://hono.dev) · [GLiNER](https://github.com/urchade/GLiNER) + [python-stdnum](https://arthurdejong.org/python-stdnum/) ([`detector/`](detector/)) · SQLite or Postgres
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
+To keep merges small, NETRAX-specific code lives in its own files wherever possible. The original README is in [docs/PASTEGUARD_README.md](docs/PASTEGUARD_README.md).
 
 ## License
 
-[Apache 2.0](LICENSE)
+Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

@@ -1,4 +1,4 @@
-# PasteGuard - Docker Compose
+# NETRAX AI Gateway - Docker Compose (based on PasteGuard)
 #
 # Production (all-in-one: proxy + detector in one container):
 #   docker compose up -d
@@ -14,7 +14,7 @@
 
 services:
   pasteguard:
-    image: ghcr.io/sgasser/pasteguard:latest
+    image: netrax-gateway:local
     build:
       context: .
       dockerfile: docker/Dockerfile

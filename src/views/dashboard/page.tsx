@@ -6,7 +6,7 @@ const DashboardPage: FC = () => {
 			<head>
 				<meta charset="UTF-8" />
 				<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-				<title>PasteGuard Dashboard</title>
+				<title>NETRAX AI Gateway</title>
 				<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 				<link rel="stylesheet" href="/dashboard/tailwind.css" />
 				<style
@@ -222,7 +222,7 @@ const Header: FC = () => (
 				<rect x="22" y="40" width="17" height="4" rx="2" fill="var(--color-accent)" opacity="0.3"/>
 			</svg>
 			<div class="text-xl font-bold text-text-primary" style="letter-spacing: var(--tracking-tight)">
-				Paste<span class="text-accent">Guard</span>
+				NETRAX<span class="text-accent"> AI</span>
 			</div>
 		</div>
 		<div class="flex items-center gap-4">

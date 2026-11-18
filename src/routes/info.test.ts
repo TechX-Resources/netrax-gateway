@@ -12,7 +12,7 @@ describe("GET /info", () => {
     expect(res.status).toBe(200);
 
     const body = (await res.json()) as Record<string, unknown>;
-    expect(body.name).toBe("PasteGuard");
+    expect(body.name).toBe("NETRAX AI Gateway");
     expect(body.version).toMatch(/^\d+\.\d+\.\d+$/);
     expect(body.mode).toBeDefined();
     expect(body.providers).toBeDefined();

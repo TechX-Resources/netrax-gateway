@@ -1,0 +1,13 @@
+NETRAX AI Gateway
+Copyright 2026 TechX Labs, Inc.
+
+This product is a derivative work of PasteGuard
+(https://github.com/sgasser/pasteguard), licensed under the Apache License,
+Version 2.0. The full license is in the LICENSE file.
+
+TechX Labs, Inc. has modified the original work. Changes include product
+naming and branding, documentation, packaging and additional features.
+The git history records every change made after the original work.
+
+"PasteGuard" is the name of the original project and is used here only to
+identify the origin of this software.

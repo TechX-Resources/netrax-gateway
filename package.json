@@ -1,7 +1,7 @@
 {
-  "name": "pasteguard",
+  "name": "netrax-gateway",
   "version": "0.9.9",
-  "description": "Privacy proxy for LLMs. Masks personal data and secrets before sending to your provider.",
+  "description": "NETRAX AI Gateway: masks personal data and secrets before they reach AI providers, or keeps sensitive requests on a local model. Based on PasteGuard.",
   "type": "module",
   "main": "src/index.ts",
   "scripts": {

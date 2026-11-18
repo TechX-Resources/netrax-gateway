@@ -23,9 +23,9 @@ infoRoutes.get("/info", (c) => {
   };
 
   const info: Record<string, unknown> = {
-    name: "PasteGuard",
+    name: "NETRAX AI Gateway",
     version: pkg.version,
-    description: "Privacy proxy for LLMs",
+    description: "Keeps sensitive data private when teams use AI",
     mode: config.mode,
     providers,
     pii_detection: {

@@ -24,7 +24,7 @@ if (config.dashboard.auth) {
 		basicAuth({
 			username: config.dashboard.auth.username,
 			password: config.dashboard.auth.password,
-			realm: "PasteGuard Dashboard",
+			realm: "NETRAX AI Gateway",
 		}),
 	);
 }
