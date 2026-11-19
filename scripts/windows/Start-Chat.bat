@@ -22,6 +22,8 @@ docker run -d --name netrax-chat -p 3080:8080 ^
   --add-host=host.docker.internal:host-gateway ^
   -e OPENAI_API_BASE_URL=http://host.docker.internal:3000/openai/v1 ^
   -e ENABLE_OLLAMA_API=False ^
+  -e OLLAMA_BASE_URL=http://ollama-disabled.invalid ^
+  -e ENABLE_PERSISTENT_CONFIG=False ^
   -e WEBUI_NAME="NETRAX Chat" ^
   -v netrax-chat:/app/backend/data ^
   --restart unless-stopped ^
