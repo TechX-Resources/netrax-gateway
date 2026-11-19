@@ -28,6 +28,9 @@ if (-not (Test-Path config.yaml)) {
   $cfg = $cfg -replace '(?m)^mode: mask', 'mode: route'
   $cfg = $cfg -replace 'base_url: http://localhost:11434', 'base_url: http://host.docker.internal:11434'
   $cfg = $cfg -replace '(?m)^(\s*)model: llama3\.2', "`${1}model: $model"
+  # Local-only by default for the demo: every request is answered on this PC.
+  # Set NETRAX_LOCAL_ONLY=0 before running to send non-sensitive requests to the cloud.
+  if ($env:NETRAX_LOCAL_ONLY -ne "0") { $cfg = $cfg -replace '(?m)^([ \t]*)model: (\S+)[ \t]*\r?$', "`${1}model: `$2`n`${1}local_only: true" }
   $cfg = $cfg -replace '(?m)^dashboard:\r?\n(\s*)enabled: false', "dashboard:`n`${1}enabled: true"
   [System.IO.File]::WriteAllText((Join-Path $repo "config.yaml"), $cfg, (New-Object System.Text.UTF8Encoding $false))
 } else { Write-Host "config.yaml already exists - keeping it." }

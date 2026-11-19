@@ -7,6 +7,7 @@ import { logRequest } from "../logging/logger";
 import type { PlaceholderContext } from "../masking/context";
 import { anthropicExtractor, remaskAnthropicToolUseHistory } from "../masking/extractors/anthropic";
 import { restoreResponse } from "../masking/restorer";
+import { isLocalOnly } from "../netrax/local-only";
 import type { PIIDetectResult } from "../pii/request";
 import {
   PrivacyPipelineDetectionError,
@@ -110,7 +111,8 @@ anthropicRoutes.post(
 
     const shouldRouteToLocal =
       config.mode === "route" &&
-      (piiResult.hasPII ||
+      (isLocalOnly(config) ||
+        piiResult.hasPII ||
         (secretsResult.detection?.detected && config.secrets_detection.action === "route_local"));
 
     if (shouldRouteToLocal) {

@@ -10,6 +10,9 @@ const LocalProviderSchema = z.object({
   api_key: z.string().optional(),
   base_url: z.string().url(),
   model: z.string(), // Required: all PII requests use this model
+  // NETRAX: route mode only. When true, every request is answered by this local
+  // model, sensitive or not, and nothing is sent to a cloud provider.
+  local_only: z.boolean().optional(),
 });
 
 // Providers - OpenAI-compatible endpoints (cloud or self-hosted)

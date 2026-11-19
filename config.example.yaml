@@ -42,6 +42,9 @@ local:
   base_url: http://localhost:11434
   model: llama3.2
   # api_key: ${LOCAL_API_KEY}  # Only needed for OpenAI-compatible servers
+  # NETRAX local-only: answer every request with this local model; nothing goes to the cloud.
+  # Chat apps see only this model at /openai/v1/models and need no cloud API key.
+  # local_only: true
 
 # Masking settings (only for mask mode)
 masking:

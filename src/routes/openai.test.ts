@@ -605,3 +605,69 @@ describe("Zod schema preserves unknown fields", () => {
     expect((result as any).custom_field).toBe("preserved");
   });
 });
+
+describe("NETRAX local-only mode", () => {
+  test("lists only the local model", async () => {
+    config.mode = "route";
+    config.local = {
+      type: "ollama",
+      base_url: "http://local.test",
+      model: "llama3.2",
+      local_only: true,
+    };
+    const res = await app.request("/openai/v1/models");
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { data: Array<{ id: string; owned_by: string }> };
+    expect(body.data).toEqual([
+      expect.objectContaining({ id: "llama3.2", owned_by: "netrax-local" }),
+    ]);
+  });
+
+  test("sends a request with no sensitive data to the local model, not OpenAI", async () => {
+    config.mode = "route";
+    config.local = {
+      type: "ollama",
+      base_url: "http://local.test",
+      model: "llama3.2",
+      local_only: true,
+    };
+    mockAnalyzeRequest.mockResolvedValueOnce(noPII);
+    const urls: string[] = [];
+    globalThis.fetch = (async (target: string | URL | Request) => {
+      urls.push(target instanceof Request ? target.url : String(target));
+      return Response.json({
+        id: "chatcmpl_local",
+        object: "chat.completion",
+        created: 1,
+        model: "llama3.2",
+        choices: [
+          { index: 0, message: { role: "assistant", content: "Hi" }, finish_reason: "stop" },
+        ],
+      });
+    }) as typeof fetch;
+    const res = await app.request("/openai/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "llama3.2",
+        messages: [{ role: "user", content: "Hello there" }],
+      }),
+    });
+    expect(res.status).toBe(200);
+    expect(res.headers.get("X-PasteGuard-Provider")).toBe("local");
+    expect(urls.every((u) => u.startsWith("http://local.test"))).toBe(true);
+    expect(urls.some((u) => u.includes("api.openai.com"))).toBe(false);
+  });
+
+  test("without local_only, /v1/models is still proxied upstream", async () => {
+    config.mode = "route";
+    config.local = { type: "ollama", base_url: "http://local.test", model: "llama3.2" };
+    let upstream = "";
+    globalThis.fetch = (async (target: string | URL | Request) => {
+      upstream = target instanceof Request ? target.url : String(target);
+      return Response.json({ object: "list", data: [] });
+    }) as typeof fetch;
+    await app.request("/openai/v1/models");
+    expect(upstream).toBe(`${config.providers.openai.base_url}/models`);
+  });
+});

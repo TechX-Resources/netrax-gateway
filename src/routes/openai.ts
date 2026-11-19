@@ -8,6 +8,7 @@ import { logRequest } from "../logging/logger";
 import type { PlaceholderContext } from "../masking/context";
 import { openaiExtractor, remaskOpenAIToolCallArguments } from "../masking/extractors/openai";
 import { restoreResponse } from "../masking/restorer";
+import { isLocalOnly, localModelList } from "../netrax/local-only";
 import type { PIIDetectResult } from "../pii/request";
 import {
   PrivacyPipelineDetectionError,
@@ -82,7 +83,8 @@ openaiRoutes.post(
     // Route mode: send to local if PII/secrets detected, otherwise OpenAI
     const shouldRouteLocal =
       config.mode === "route" &&
-      (piiResult.hasPII ||
+      (isLocalOnly(config) ||
+        piiResult.hasPII ||
         (secretsResult.detection?.detected && config.secrets_detection.action === "route_local"));
 
     if (shouldRouteLocal) {
@@ -113,6 +115,13 @@ openaiRoutes.post(
 );
 
 openaiRoutes.route("/v1", openaiResponsesRoutes);
+
+// NETRAX local-only mode: list just the local model, so chat apps work with no cloud key.
+openaiRoutes.get("/v1/models", (c, next) => {
+  const config = getConfig();
+  if (!isLocalOnly(config)) return next();
+  return c.json(localModelList(config));
+});
 
 openaiRoutes.all("/*", (c) => {
   const normalizedPath = normalizeOpenAIPath(c.req.path);

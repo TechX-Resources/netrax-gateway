@@ -35,6 +35,10 @@ Point any OpenAI- or Anthropic-compatible app at these URLs instead of the provi
 
 Requests that contain sensitive data are answered by the local model, and the rest go to your cloud provider.
 
+### Local-only mode
+
+To keep every request on your own machine, add `local_only: true` under `local:` (route mode). NETRAX still checks and logs each request, but the local model answers all of them, and `/openai/v1/models` lists only the local model, so chat apps work without any cloud API key.
+
 ## Development
 
 Requires [Bun](https://bun.sh).

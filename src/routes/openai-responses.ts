@@ -13,6 +13,7 @@ import {
   responsesExtractor,
 } from "../masking/extractors/responses";
 import { restoreResponse } from "../masking/restorer";
+import { isLocalOnly } from "../netrax/local-only";
 import type { PIIDetectResult } from "../pii/request";
 import {
   PrivacyPipelineDetectionError,
@@ -103,7 +104,8 @@ async function handleResponsesRequest(c: Context, request: ResponsesRequest) {
 
   const shouldBlockRouteMode =
     config.mode === "route" &&
-    (piiResult.hasPII ||
+    (isLocalOnly(config) ||
+      piiResult.hasPII ||
       (secretsResult.detection?.detected && config.secrets_detection.action === "route_local"));
   if (shouldBlockRouteMode) {
     return respondRouteModeBlocked(c, request, piiResult, secretsResult, startTime);
