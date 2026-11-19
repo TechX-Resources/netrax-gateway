@@ -1,6 +1,22 @@
 @echo off
 REM NETRAX demo chat window (Open WebUI) wired to the NETRAX gateway on this PC.
 REM Every message goes through NETRAX at http://localhost:3000 - never straight to OpenAI or Ollama.
+set IMAGE=ghcr.io/open-webui/open-webui:main
+set TRIES=0
+:pull
+set /a TRIES+=1
+echo Downloading the chat app (attempt %TRIES% of 5)...
+docker pull %IMAGE%
+if not errorlevel 1 goto pulled
+if %TRIES% GEQ 5 (
+  echo The download kept failing. Check your internet connection and run this again.
+  pause
+  exit /b 1
+)
+echo Download interrupted - retrying in 10 seconds. Finished parts are kept.
+timeout /t 10 >nul
+goto pull
+:pulled
 docker rm -f netrax-chat >nul 2>&1
 docker run -d --name netrax-chat -p 8080:8080 ^
   --add-host=host.docker.internal:host-gateway ^
@@ -9,7 +25,7 @@ docker run -d --name netrax-chat -p 8080:8080 ^
   -e WEBUI_NAME="NETRAX Chat" ^
   -v netrax-chat:/app/backend/data ^
   --restart unless-stopped ^
-  ghcr.io/open-webui/open-webui:main
+  %IMAGE%
 if errorlevel 1 (
   echo Could not start the chat window. Is Docker Desktop running?
   pause
